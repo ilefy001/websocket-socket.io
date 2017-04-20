@@ -1,0 +1,150 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>live</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <style>/* Fix user-agent */
+*{box-sizing:border-box}html{font-family:"HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;font-weight:300;-webkit-font-smoothing:antialiased}html,body{height:100%;margin:0;padding:0}ul{list-style:none}.pages{height:100%;margin:0;padding:0;width:100%}.page{height:100%;position:absolute;width:100%}.login.page{background-color:#000}.login.page .form{height:100px;margin-top:-100px;position:absolute;text-align:center;top:50%;width:100%}.login.page .form .usernameInput{background-color:transparent;border:0;border-bottom:2px solid #fff;outline:0;padding-bottom:15px;text-align:center;width:400px}.login.page .title{font-size:200%}.login.page .usernameInput{font-size:200%;letter-spacing:3px}.login.page .title,.login.page .usernameInput{color:#fff;font-weight:100}.chat.page{display:none}.messages{font-size:150%}.inputMessage{font-size:100%}.log{color:gray;font-size:70%;margin:5px;text-align:center}.chatArea{height:100%;padding-bottom:60px}.messages{height:100%;margin:0;overflow-y:scroll;padding:10px 20px 10px 20px}.message.typing .messageBody{color:gray}.username{float:left;font-weight:700;overflow:hidden;padding-right:15px;text-align:right}.inputMessage{border:10px solid #000;bottom:0;height:60px;left:0;outline:0;padding-left:10px;position:absolute;right:0;width:100%}
+  </style>
+  <!-- Bootstrap 3.3.6 -->
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/css/AdminLTE.min.css">
+
+</head>
+<body>
+<div class="container">
+  <div class="row">
+    <div class="pages col-md-5">
+      <div class="box box-primary direct-chat direct-chat-primary chat page">
+          <div class="box-header with-border">
+            <h4 class="box-title">live</h4>
+          </div>
+          <!-- /.box-header -->
+          <div class="box-body">
+            <!-- Conversations are loaded here -->
+            <div class="direct-chat-messages" id="messages" style="height: 500px;">
+              <!-- Message. Default to the left -->
+              <script type="text/html" id="msg_tpl">
+              <div class="direct-chat-msg message %float" data-username="%username">
+                <div class="direct-chat-info clearfix">
+                  <span class="direct-chat-name pull-left username">%username</span>
+                </div>
+                <!-- /.direct-chat-info -->
+                <img class="direct-chat-img" src="%photo" alt="Message User Image"><!-- /.direct-chat-img -->
+                <div class="direct-chat-text messageBody">
+                  %message
+                </div>
+                <!-- /.direct-chat-text -->
+              </div>
+              </script>
+              <!-- /.direct-chat-msg -->
+            <!--<ul ></ul>-->
+          </div>
+        <input id="inputMessage" class="form-control" placeholder="输入你想说的话"/>
+      </div>
+      <div class="login page">
+        <div class="form">
+          <h3 class="title">你的昵称是什么?</h3>
+          <input class="usernameInput" type="text" maxlength="14" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+  <script src="http://s4.qhimg.com/static/535dde855bc726e2/socket.io-1.2.0.js"></script>
+  <script src="http://s4.qhimg.com/static/8b5050af3b8512e1/jquery.js"></script>
+  <script type="text/javascript" src="/static/js/index.js"></script>
+  <script>
+      $(function () {
+          setUsername();
+      });
+  //$(function() {
+
+
+  var keydown = function (event) {
+    // Auto-focus the current input when a key is typed
+    if (!(event.ctrlKey || event.metaKey || event.altKey)) {
+      $currentInput.focus();
+    }
+    // When the client hits ENTER on their keyboard
+    if (event.which === 13) {
+      if (username) {
+        sendMessage();
+        socket.emit('stoptyping');
+        typing = false;
+      } else {
+        setUsername();
+      }
+    }
+  }
+
+  $usernameInput.keydown(keydown);
+  $inputMessage.keydown(keydown);
+  // Keyboard events
+  //$window.keypress(keydown);
+
+  $inputMessage.on('input', function() {
+    updateTyping();
+  });
+
+  // Click events
+
+  // Focus input when clicking anywhere on login page
+  $loginPage.click(function () {
+    $currentInput.focus();
+  });
+
+  // Focus input when clicking on the message input's border
+  $inputMessage.click(function () {
+    $inputMessage.focus();
+  });
+
+  // Socket events
+
+  // Whenever the server emits 'login', log the login message
+  socket.on('login', function (data) {
+    connected = true;
+    // Display the welcome message
+    var message = "Welcome to Socket.IO Chat – ";
+    log(message, {
+      prepend: true
+    });
+    addParticipantsMessage(data);
+  });
+
+  // Whenever the server emits 'new message', update the chat body
+  socket.on('chat', function (data) {
+    addChatMessage(data);
+  });
+
+  // Whenever the server emits 'user joined', log it in the chat body
+  socket.on('userjoin', function (data) {
+    log(data.username + ' joined');
+    addParticipantsMessage(data);
+  });
+
+  // Whenever the server emits 'user left', log it in the chat body
+  socket.on('userleft', function (data) {
+    log(data.username + ' left');
+    addParticipantsMessage(data);
+    removeChatTyping(data);
+  });
+
+  // Whenever the server emits 'typing', show the typing message
+  socket.on('typing', function (data) {
+    addChatTyping(data);
+  });
+
+  // Whenever the server emits 'stop typing', kill the typing message
+  socket.on('stoptyping', function (data) {
+    removeChatTyping(data);
+  });
+//});
+</script>
+</body>
+</html>
