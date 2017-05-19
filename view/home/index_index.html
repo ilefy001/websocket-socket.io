@@ -23,13 +23,14 @@
           <div class="box-header with-border">
             <h4 class="box-title">live</h4>
           </div>
+          <input type="hidden" id="username" value="<%= username %>">
           <!-- /.box-header -->
           <div class="box-body">
             <!-- Conversations are loaded here -->
             <div class="direct-chat-messages" id="messages" style="height: 500px;">
               <!-- Message. Default to the left -->
               <script type="text/html" id="msg_tpl">
-              <div class="direct-chat-msg message %float" data-username="%username">
+              <div class="direct-chat-msg message %float %typing" data-username="%username">
                 <div class="direct-chat-info clearfix">
                   <span class="direct-chat-name pull-left username">%username</span>
                 </div>
@@ -66,84 +67,7 @@
   //$(function() {
 
 
-  var keydown = function (event) {
-    // Auto-focus the current input when a key is typed
-    if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-      $currentInput.focus();
-    }
-    // When the client hits ENTER on their keyboard
-    if (event.which === 13) {
-      if (username) {
-        sendMessage();
-        socket.emit('stoptyping');
-        typing = false;
-      } else {
-        setUsername();
-      }
-    }
-  }
 
-  $usernameInput.keydown(keydown);
-  $inputMessage.keydown(keydown);
-  // Keyboard events
-  //$window.keypress(keydown);
-
-  $inputMessage.on('input', function() {
-    updateTyping();
-  });
-
-  // Click events
-
-  // Focus input when clicking anywhere on login page
-  $loginPage.click(function () {
-    $currentInput.focus();
-  });
-
-  // Focus input when clicking on the message input's border
-  $inputMessage.click(function () {
-    $inputMessage.focus();
-  });
-
-  // Socket events
-
-  // Whenever the server emits 'login', log the login message
-  socket.on('login', function (data) {
-    connected = true;
-    // Display the welcome message
-    var message = "Welcome to Socket.IO Chat – ";
-    log(message, {
-      prepend: true
-    });
-    addParticipantsMessage(data);
-  });
-
-  // Whenever the server emits 'new message', update the chat body
-  socket.on('chat', function (data) {
-    addChatMessage(data);
-  });
-
-  // Whenever the server emits 'user joined', log it in the chat body
-  socket.on('userjoin', function (data) {
-    log(data.username + ' joined');
-    addParticipantsMessage(data);
-  });
-
-  // Whenever the server emits 'user left', log it in the chat body
-  socket.on('userleft', function (data) {
-    log(data.username + ' left');
-    addParticipantsMessage(data);
-    removeChatTyping(data);
-  });
-
-  // Whenever the server emits 'typing', show the typing message
-  socket.on('typing', function (data) {
-    addChatTyping(data);
-  });
-
-  // Whenever the server emits 'stop typing', kill the typing message
-  socket.on('stoptyping', function (data) {
-    removeChatTyping(data);
-  });
 //});
 </script>
 </body>

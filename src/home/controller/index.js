@@ -10,9 +10,16 @@ export default class extends Base {
    * index action
    * @return {Promise} []
    */
-  indexAction(){
+  async indexAction(){
     //auto render template file index_index.html
-    return this.display();
+      let userInfo = await this.session('userInfo');
+      console.log(userInfo);
+      if (!think.isEmpty(userInfo)){
+          this.assign('username',userInfo.username);
+      }else{
+          return this.redirect('user/login');
+      }
+      return  this.display();
   }
   openAction(self){
     var socket = self.http.socket;

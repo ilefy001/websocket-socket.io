@@ -2,6 +2,8 @@
  * Created by Administrator on 2017/4/20.
  */
 
+
+
 var FADE_TIME = 150; // ms
 var TYPING_TIMER_LENGTH = 400; // ms
 var COLORS = [
@@ -41,8 +43,8 @@ function addParticipantsMessage (data) {
 
 // Sets the client's username
 function setUsername () {
-    username = cleanInput($.trim($usernameInput.val()));
-    username = 'test';
+    // username = cleanInput($.trim($usernameInput.val()));
+    username = $('#username').val();
     // If the username is valid
     if (username) {
         $loginPage.fadeOut();
@@ -52,6 +54,8 @@ function setUsername () {
 
         // Tell the server your username
         socket.emit('adduser', username);
+    } else {
+        // window.location.href = 'user/login';
     }
 }
 
@@ -89,11 +93,8 @@ function addChatMessage (data, options) {
     }
 
     var typingClass = data.typing ? 'typing' : '';
-    var $messageDiv = $('<li class="message"></li>')
-        .data('username', data.username)
-        .addClass(typingClass);
-
     var $messageDiv = $('#msg_tpl').html(); //信息模板
+    $messageDiv = $messageDiv.replace(/%typing/g,typingClass);
     $messageDiv = $messageDiv.replace(/%username/g,data.username);
     $messageDiv = $messageDiv.replace(/%message/g,data.message);
 
@@ -195,3 +196,82 @@ function getUsernameColor (username) {
     var index = Math.abs(hash % COLORS.length);
     return COLORS[index];
 }
+
+var keydown = function (event) {
+    // Auto-focus the current input when a key is typed
+    if (!(event.ctrlKey || event.metaKey || event.altKey)) {
+        $currentInput.focus();
+    }
+    // When the client hits ENTER on their keyboard
+    if (event.which === 13) {
+        if (username) {
+            sendMessage();
+            socket.emit('stoptyping');
+            typing = false;
+        } else {
+            setUsername();
+        }
+    }
+}
+
+$usernameInput.keydown(keydown);
+$inputMessage.keydown(keydown);
+// Keyboard events
+//$window.keypress(keydown);
+
+$inputMessage.on('input', function() {
+    updateTyping();
+});
+
+// Click events
+
+// Focus input when clicking anywhere on login page
+$loginPage.click(function () {
+    $currentInput.focus();
+});
+
+// Focus input when clicking on the message input's border
+$inputMessage.click(function () {
+    $inputMessage.focus();
+});
+
+// Socket events
+
+// Whenever the server emits 'login', log the login message
+socket.on('login', function (data) {
+    connected = true;
+    // Display the welcome message
+    var message = "Welcome to Socket.IO Chat – ";
+    log(message, {
+        prepend: true
+    });
+    addParticipantsMessage(data);
+});
+
+// Whenever the server emits 'new message', update the chat body
+socket.on('chat', function (data) {
+    addChatMessage(data);
+});
+
+// Whenever the server emits 'user joined', log it in the chat body
+socket.on('userjoin', function (data) {
+    log(data.username + ' joined');
+    addParticipantsMessage(data);
+});
+
+// Whenever the server emits 'user left', log it in the chat body
+socket.on('userleft', function (data) {
+    log(data.username + ' left');
+    addParticipantsMessage(data);
+    removeChatTyping(data);
+});
+
+// Whenever the server emits 'typing', show the typing message
+socket.on('typing', function (data) {
+    addChatTyping(data);
+});
+
+// Whenever the server emits 'stop typing', kill the typing message
+socket.on('stoptyping', function (data) {
+    removeChatTyping(data);
+});

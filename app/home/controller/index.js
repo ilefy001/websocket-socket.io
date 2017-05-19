@@ -1,27 +1,102 @@
-'use strict';var _inherits = require('babel-runtime/helpers/inherits')['default'];var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];exports.__esModule = true;var _baseJs = require(
+'use strict';
 
-'./base.js');var _baseJs2 = _interopRequireDefault(_baseJs);
+exports.__esModule = true;
+
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _base = require('./base.js');
+
+var _base2 = _interopRequireDefault(_base);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var usernames = {};
-var numUsers = 0;var _default = (function (_Base) {_inherits(_default, _Base);function _default() {_classCallCheck(this, _default);_Base.apply(this, arguments);}
+var numUsers = 0;
 
+var _class = function (_Base) {
+  (0, _inherits3.default)(_class, _Base);
+
+  function _class() {
+    (0, _classCallCheck3.default)(this, _class);
+    return (0, _possibleConstructorReturn3.default)(this, _Base.apply(this, arguments));
+  }
 
   /**
    * index action
    * @return {Promise} []
-   */_default.prototype.
-  indexAction = function indexAction() {
-    //auto render template file index_index.html
-    return this.display();};_default.prototype.
+   */
+  _class.prototype.indexAction = function () {
+    var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
+      var userInfo;
+      return _regenerator2.default.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return this.session('userInfo');
 
-  openAction = function openAction(self) {
+            case 2:
+              userInfo = _context.sent;
+
+              console.log(userInfo);
+
+              if (think.isEmpty(userInfo)) {
+                _context.next = 8;
+                break;
+              }
+
+              this.assign('username', userInfo.username);
+              _context.next = 9;
+              break;
+
+            case 8:
+              return _context.abrupt('return', this.redirect('user/login'));
+
+            case 9:
+              return _context.abrupt('return', this.display());
+
+            case 10:
+            case 'end':
+              return _context.stop();
+          }
+        }
+      }, _callee, this);
+    }));
+
+    function indexAction() {
+      return _ref.apply(this, arguments);
+    }
+
+    return indexAction;
+  }();
+
+  _class.prototype.openAction = function openAction(self) {
     var socket = self.http.socket;
-    this.broadcast('new message', { 
-      username: socket.username, 
-      message: self.http.data });};_default.prototype.
+    this.broadcast('new message', {
+      username: socket.username,
+      message: self.http.data
+    });
+  };
 
-
-  adduserAction = function adduserAction(self) {
+  _class.prototype.adduserAction = function adduserAction(self) {
     var socket = self.http.socket;
     var username = self.http.data;
     // we store the username in the socket session for this client
@@ -29,50 +104,63 @@ var numUsers = 0;var _default = (function (_Base) {_inherits(_default, _Base);fu
     // add the client's username to the global list
     usernames[username] = username;
     ++numUsers;
-    this.emit('login', { 
-      numUsers: numUsers });
-
+    this.emit('login', {
+      numUsers: numUsers
+    });
     // echo globally (all clients) that a person has connected
-    this.broadcast('userjoin', { 
-      username: socket.username, 
-      numUsers: numUsers });};_default.prototype.
+    this.broadcast('userjoin', {
+      username: socket.username,
+      numUsers: numUsers
+    });
+  };
 
-
-  closeAction = function closeAction(self) {
+  _class.prototype.closeAction = function closeAction(self) {
     var socket = self.http.socket;
     // remove the username from global usernames list
     if (socket.username) {
       delete usernames[socket.username];
       --numUsers;
       // echo globally that this client has left
-      this.broadcast('userleft', { 
-        username: socket.username, 
-        numUsers: numUsers });}};_default.prototype.
+      this.broadcast('userleft', {
+        username: socket.username,
+        numUsers: numUsers
+      });
+    }
+  };
 
-
-
-  chatAction = function chatAction(self) {
+  _class.prototype.chatAction = function chatAction(self) {
     var socket = self.http.socket;
     // we tell the client to execute 'chat'
-    this.broadcast('chat', { 
-      username: socket.username, 
-      message: self.http.data });};_default.prototype.
+    this.broadcast('chat', {
+      username: socket.username,
+      message: self.http.data
+    });
+  };
 
-
-  typingAction = function typingAction(self) {
+  _class.prototype.typingAction = function typingAction(self) {
     var socket = self.http.socket;
-    this.broadcast('typing', { 
-      username: socket.username });};_default.prototype.
+    this.broadcast('typing', {
+      username: socket.username
+    });
+  };
 
-
-  stoptypingAction = function stoptypingAction(self) {
+  _class.prototype.stoptypingAction = function stoptypingAction(self) {
     var socket = self.http.socket;
-    this.broadcast('stoptyping', { 
-      username: socket.username });};_default.prototype.
+    this.broadcast('stoptyping', {
+      username: socket.username
+    });
+  };
 
+  _class.prototype.liveAction = function liveAction(self) {
+    return this.display();
+  };
 
-  liveAction = function liveAction(self) {
-    return this.display();};_default.prototype.
+  _class.prototype.newchatAction = function newchatAction(self) {
+    return this.display('chat');
+  };
 
-  newchatAction = function newchatAction(self) {
-    return this.display('chat');};return _default;})(_baseJs2['default']);exports['default'] = _default;module.exports = exports['default'];
+  return _class;
+}(_base2.default);
+
+exports.default = _class;
+//# sourceMappingURL=index.js.map
