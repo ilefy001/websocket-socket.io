@@ -24,6 +24,7 @@
             <h4 class="box-title">live</h4>
           </div>
           <input type="hidden" id="username" value="<%= username %>">
+          <input type="hidden" id="photo" value="<%= photo %>">
           <!-- /.box-header -->
           <div class="box-body">
             <!-- Conversations are loaded here -->
@@ -32,11 +33,11 @@
               <script type="text/html" id="msg_tpl">
               <div class="direct-chat-msg message %float %typing" data-username="%username">
                 <div class="direct-chat-info clearfix">
-                  <span class="direct-chat-name pull-left username">%username</span>
+                  <span class="direct-chat-name pull-%float username">%username</span>
                 </div>
                 <!-- /.direct-chat-info -->
                 <img class="direct-chat-img" src="%photo" alt="Message User Image"><!-- /.direct-chat-img -->
-                <div class="direct-chat-text messageBody">
+                <div class="direct-chat-text messageBody" style="%text_style">
                   %message
                 </div>
                 <!-- /.direct-chat-text -->
@@ -64,11 +65,6 @@
       $(function () {
           setUsername();
       });
-  //$(function() {
-
-
-
-//});
 </script>
 </body>
 </html>

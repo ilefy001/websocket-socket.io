@@ -24,6 +24,7 @@ var $chatPage = $('.chat.page'); // The chatroom page
 
 // Prompt for setting a username
 var username;
+var photo;
 var connected = false;
 var typing = false;
 var lastTypingTime;
@@ -45,6 +46,7 @@ function addParticipantsMessage (data) {
 function setUsername () {
     // username = cleanInput($.trim($usernameInput.val()));
     username = $('#username').val();
+    photo = $('#photo').val();
     // If the username is valid
     if (username) {
         $loginPage.fadeOut();
@@ -69,8 +71,9 @@ function sendMessage () {
         $inputMessage.val('');
         addChatMessage({
             username: username,
-            message: message
-        });
+            message: message,
+            photo:photo,
+        }); //对话框中添加该对话
         // tell server to execute 'new message' and send along one parameter
         socket.emit('chat', message);
     }
@@ -97,13 +100,14 @@ function addChatMessage (data, options) {
     $messageDiv = $messageDiv.replace(/%typing/g,typingClass);
     $messageDiv = $messageDiv.replace(/%username/g,data.username);
     $messageDiv = $messageDiv.replace(/%message/g,data.message);
+    $messageDiv = $messageDiv.replace(/%photo/g,data.photo);
 
     if (username == data.username) {
         $messageDiv = $messageDiv.replace(/%float/g,'right');
-        $messageDiv = $messageDiv.replace(/%photo/g,'/static/img/user8-128x128.jpg');
+        $messageDiv = $messageDiv.replace(/%text_style/g,'float:right;margin-right:10px;');
     } else {
         $messageDiv = $messageDiv.replace(/%float/g,'');
-        $messageDiv = $messageDiv.replace(/%photo/g,'/static/img/user3-128x128.jpg');
+        $messageDiv = $messageDiv.replace(/%text_style/g,'float:left;margin-left:10px;');
     }
     addMessageElement($messageDiv, options);
 }

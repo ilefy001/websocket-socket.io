@@ -11,7 +11,7 @@ export default {
     },
     adapter: {
         file: {
-            path: think.RUNTIME_PATH + '/session'
+            path: think.RUNTIME_PATH +'/session'
         }
     }
 };

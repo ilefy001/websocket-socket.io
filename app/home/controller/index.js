@@ -30,6 +30,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var usernames = {};
 var numUsers = 0;
+var username = '';
+var photo = '';
 
 var _class = function (_Base) {
   (0, _inherits3.default)(_class, _Base);
@@ -56,24 +58,25 @@ var _class = function (_Base) {
             case 2:
               userInfo = _context.sent;
 
-              console.log(userInfo);
-
               if (think.isEmpty(userInfo)) {
-                _context.next = 8;
+                _context.next = 10;
                 break;
               }
 
               this.assign('username', userInfo.username);
-              _context.next = 9;
+              this.assign('photo', userInfo.photo);
+              username = userInfo.username;
+              photo = userInfo.photo;
+              _context.next = 11;
               break;
 
-            case 8:
+            case 10:
               return _context.abrupt('return', this.redirect('user/login'));
 
-            case 9:
+            case 11:
               return _context.abrupt('return', this.display());
 
-            case 10:
+            case 12:
             case 'end':
               return _context.stop();
           }
@@ -96,23 +99,52 @@ var _class = function (_Base) {
     });
   };
 
-  _class.prototype.adduserAction = function adduserAction(self) {
-    var socket = self.http.socket;
-    var username = self.http.data;
-    // we store the username in the socket session for this client
-    socket.username = username;
-    // add the client's username to the global list
-    usernames[username] = username;
-    ++numUsers;
-    this.emit('login', {
-      numUsers: numUsers
-    });
-    // echo globally (all clients) that a person has connected
-    this.broadcast('userjoin', {
-      username: socket.username,
-      numUsers: numUsers
-    });
-  };
+  /**
+   * 新增用户
+   * @param self
+   * @returns {Promise.<void>}
+   */
+
+
+  _class.prototype.adduserAction = function () {
+    var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(self) {
+      var socket;
+      return _regenerator2.default.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              socket = self.http.socket;
+              // we store the username in the socket session for this client
+
+              socket.username = username;
+              socket.photo = photo;
+              console.log(username);
+              // add the client's username to the global list
+              usernames[username] = username;
+              ++numUsers;
+              this.emit('login', {
+                numUsers: numUsers
+              });
+              // echo globally (all clients) that a person has connected
+              this.broadcast('userjoin', {
+                username: socket.username,
+                numUsers: numUsers
+              });
+
+            case 8:
+            case 'end':
+              return _context2.stop();
+          }
+        }
+      }, _callee2, this);
+    }));
+
+    function adduserAction(_x) {
+      return _ref2.apply(this, arguments);
+    }
+
+    return adduserAction;
+  }();
 
   _class.prototype.closeAction = function closeAction(self) {
     var socket = self.http.socket;
@@ -133,6 +165,7 @@ var _class = function (_Base) {
     // we tell the client to execute 'chat'
     this.broadcast('chat', {
       username: socket.username,
+      photo: socket.photo,
       message: self.http.data
     });
   };
@@ -153,10 +186,6 @@ var _class = function (_Base) {
 
   _class.prototype.liveAction = function liveAction(self) {
     return this.display();
-  };
-
-  _class.prototype.newchatAction = function newchatAction(self) {
-    return this.display('chat');
   };
 
   return _class;

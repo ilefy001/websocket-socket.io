@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2017/4/27.
  */
-//添加每日一题
+//登录
 function login() {
     var data = $('#login_form').serializeArray();
     $('#sub_btn').text('正在登录...').attr("disabled",true);

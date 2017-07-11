@@ -4,6 +4,8 @@ import Base from './base.js';
 
 var usernames = {};
 var numUsers = 0;
+var username = '';
+var photo = '';
 
 export default class extends Base {
   /**
@@ -13,9 +15,11 @@ export default class extends Base {
   async indexAction(){
     //auto render template file index_index.html
       let userInfo = await this.session('userInfo');
-      console.log(userInfo);
       if (!think.isEmpty(userInfo)){
           this.assign('username',userInfo.username);
+          this.assign('photo',userInfo.photo);
+          username = userInfo.username;
+          photo = userInfo.photo;
       }else{
           return this.redirect('user/login');
       }
@@ -28,11 +32,18 @@ export default class extends Base {
       message: self.http.data
     });
   }
-  adduserAction(self){
+
+    /**
+     * 新增用户
+     * @param self
+     * @returns {Promise.<void>}
+     */
+  async adduserAction(self){
     var socket = self.http.socket;
-    var username = self.http.data;
     // we store the username in the socket session for this client
     socket.username = username;
+    socket.photo = photo;
+    console.log(username);
     // add the client's username to the global list
     usernames[username] = username;
     ++numUsers;
@@ -63,6 +74,7 @@ export default class extends Base {
     // we tell the client to execute 'chat'
     this.broadcast('chat', {
       username: socket.username,
+      photo:socket.photo,
       message: self.http.data
     });
   }
@@ -80,8 +92,5 @@ export default class extends Base {
   }
   liveAction(self){
     return this.display();
-  }
-  newchatAction(self){
-    return this.display('chat');
   }
 }

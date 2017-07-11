@@ -20,8 +20,8 @@ export default class extends Base {
                 .digest('hex');
 
             if (data.password == md5) {
-                this.session('userInfo', data);
-                this.success();
+                await this.session('userInfo', data);
+                this.success(1,'登录成功');
             } else {
                 this.fail(1000, '用户名或者密码错误'); //指定错误号和错误信息
             }
